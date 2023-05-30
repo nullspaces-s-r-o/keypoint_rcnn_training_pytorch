@@ -22,7 +22,7 @@ class CocoEvaluator:
             self.coco_eval[iou_type] = COCOeval(coco_gt, iouType=iou_type)
             if iou_type == 'keypoints':
                 #self.coco_eval[iou_type].params.kpt_oks_sigmas = np.array(2 * [0.5])/10.0  # Tutorial
-                self.coco_eval[iou_type].params.kpt_oks_sigmas = np.array(2 * [0.1])/10.0 # Own data
+                self.coco_eval[iou_type].params.kpt_oks_sigmas = np.array(10 * [0.1])/10.0 # Own data
 
 
         self.img_ids = []
