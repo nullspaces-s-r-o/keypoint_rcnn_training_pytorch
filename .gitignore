@@ -1,3 +1,7 @@
 virt
 .torch
 __pycache__
+back_bumper/test
+back_bumper/train
+back_bumper/keypoint_def.csv
+back_bumper/keypoints.json
