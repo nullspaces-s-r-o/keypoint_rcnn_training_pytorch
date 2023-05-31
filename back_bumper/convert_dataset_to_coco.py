@@ -8,34 +8,36 @@ import json
 TRAIN_PATH = "train"
 TEST_PATH = "test"
 
-OLD_ANNOTATIONS = "keypoints.json"
+OLD_ANNOTATIONS = "annotations"
 
-# Creating annotation folders if not existing
-try:
-    os.mkdir(join(TRAIN_PATH, "annotations"))
-except OSError as error:
-    print(error)
-
-try:
-    os.mkdir(join(TEST_PATH, "annotations"))
-except OSError as error:
-    print(error)
-
-# Loading old annotations
-f = open(OLD_ANNOTATIONS)
-old_annotations = json.load(f)
+# Getting old annotations
+old_anns = [ann for ann in listdir(OLD_ANNOTATIONS) if isfile(join(OLD_ANNOTATIONS, ann))]
 
 # Getting all image names
 train_imgs = [img for img in listdir(join(TRAIN_PATH, "images")) if isfile(join(TRAIN_PATH, "images", img))]
 test_imgs = [img for img in listdir(join(TEST_PATH, "images")) if isfile(join(TEST_PATH, "images", img))]
 
-# Scailing keypoints from 0-1 on each axis to either 0-width or 0-height
-def scale_keypoints(path, keypoints):
-    img = Image.open(path)
-    width, height = img.size
+# Loading annotation
+def load_annotation(path):
+    f = open(path)
+    ann = json.load(f)
+    return ann
+
+def get_keypoints(annotation):
+    keypoints = []
+
+    for i in range(len(annotation["shapes"])):
+        if annotation["shapes"][i]["shape_type"] == "point":
+            point = np.array(annotation["shapes"][i]["points"])
+            point = np.append(point, 1)
+            point = np.squeeze(point.tolist())
+            keypoints.append(point)
+
+    keypoints = np.array(keypoints)
+
     for i in range(len(keypoints)):
-        keypoints[i][0] = int(keypoints[i][0] * width)
-        keypoints[i][1] = int(keypoints[i][1] * height)
+        keypoints[i][0] = int(keypoints[i][0])
+        keypoints[i][1] = int(keypoints[i][1])
         keypoints[i][2] = int(keypoints[i][2])
 
     keypoints = np.array(keypoints)
@@ -45,19 +47,22 @@ def scale_keypoints(path, keypoints):
 def create_annotations(images, path):
 # Looping through all training images to create theirs individual annotations
     for img in images:
-        for ann in old_annotations:
-            ann_img = ann["img_path"][ann["img_path"].rfind("\\") + 1:]
-            if ann_img == img:
+        img_name = img[:img.rfind(".")]
 
-                keypoints = scale_keypoints(join(path, "images", img), ann["joints"])
+        for annName in old_anns:
+            ann = load_annotation(join(OLD_ANNOTATIONS, annName))
+
+            ann_short_name = annName[:annName.rfind(".")]
+
+            if ann_short_name == img_name:
+                keypoints = get_keypoints(ann)
 
                 annotation = {
                     "keypoints" : keypoints.tolist()
                 }
                 annotation = json.dumps(annotation)
 
-                name = "{}.json".format(img[:img.rfind(".")])
-                save = open(join(path, "annotations", name), "w")
+                save = open(join(path, "annotations", annName), "w")
                 save.write(annotation)
                 save.close()
 
