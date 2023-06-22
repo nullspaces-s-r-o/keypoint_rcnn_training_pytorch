@@ -11,7 +11,7 @@
 
 # In[3]:
 
-
+ANCHOR_RATIO = 0.3 #Musíme zmenšit anchory vynásobením tímto poměrem
 import os, json, cv2, numpy as np, matplotlib.pyplot as plt
 
 import torch
@@ -28,7 +28,7 @@ import albumentations as A # Library for augmentations
 
 
 # https://github.com/pytorch/vision/tree/main/references/detection
-import transforms, utils, engine, train
+#import transforms, utils, engine, train
 from utils import collate_fn
 from engine import train_one_epoch, evaluate
 
@@ -146,7 +146,7 @@ class ClassDataset(Dataset):
 # In[8]:
 
 
-KEYPOINTS_FOLDER_TRAIN = 'glue_tubes_keypoints_dataset_134imgs/train'
+KEYPOINTS_FOLDER_TRAIN = 'rv12_COCO_dataset/train'
 dataset = ClassDataset(KEYPOINTS_FOLDER_TRAIN, transform=train_transform(), demo=True)
 data_loader = DataLoader(dataset, batch_size=1, shuffle=True, collate_fn=collate_fn)
 
@@ -197,6 +197,7 @@ def visualize(image, bboxes, keypoints, image_original=None, bboxes_original=Non
 
         ax[1].imshow(image)
         ax[1].set_title('Transformed image', fontsize=fontsize)
+    plt.show()
         
 image = (batch[0][0].permute(1,2,0).numpy() * 255).astype(np.uint8)
 bboxes = batch[1][0]['boxes'].detach().cpu().numpy().astype(np.int32).tolist()
@@ -220,11 +221,11 @@ visualize(image, bboxes, keypoints, image_original, bboxes_original, keypoints_o
 # In[10]:
 
 
-def get_model(num_keypoints, weights_path=None):
+def get_model(num_keypoints, weights_path=None, anchor_ratio=1):
     #Vysvetlení anchor generátoru
     #https://stackoverflow.com/questions/56259670/difference-between-box-coordinate-and-anchor-boxes-in-keras
 
-    anchor_generator = AnchorGenerator(sizes=(32, 64, 128, 256, 512), aspect_ratios=(0.25, 0.5, 0.75, 1.0, 2.0, 3.0, 4.0))
+    anchor_generator = AnchorGenerator(sizes=(int(32*anchor_ratio), int(64*anchor_ratio), int(128*anchor_ratio), int(256*anchor_ratio), int(512*anchor_ratio)), aspect_ratios=(0.25, 0.5, 0.75, 1.0, 2.0, 3.0, 4.0))
     model = torchvision.models.detection.keypointrcnn_resnet50_fpn(pretrained=False,
                                                                    pretrained_backbone=True,
                                                                    num_keypoints=num_keypoints,
@@ -251,8 +252,8 @@ torch.cuda.is_available()
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-KEYPOINTS_FOLDER_TRAIN = 'glue_tubes_keypoints_dataset_134imgs/train'
-KEYPOINTS_FOLDER_TEST = 'glue_tubes_keypoints_dataset_134imgs/test'
+KEYPOINTS_FOLDER_TRAIN = 'rv12_COCO_dataset/train'
+KEYPOINTS_FOLDER_TEST = 'rv12_COCO_dataset/test'
 
 dataset_train = ClassDataset(KEYPOINTS_FOLDER_TRAIN, transform=train_transform(), demo=False)
 dataset_test = ClassDataset(KEYPOINTS_FOLDER_TEST, transform=None, demo=False)
@@ -260,13 +261,13 @@ dataset_test = ClassDataset(KEYPOINTS_FOLDER_TEST, transform=None, demo=False)
 data_loader_train = DataLoader(dataset_train, batch_size=3, shuffle=True, collate_fn=collate_fn)
 data_loader_test = DataLoader(dataset_test, batch_size=1, shuffle=False, collate_fn=collate_fn)
 
-model = get_model(num_keypoints = 2)
+model = get_model(num_keypoints = 2, anchor_ratio=ANCHOR_RATIO)
 model.to(device)
 
 params = [p for p in model.parameters() if p.requires_grad]
 optimizer = torch.optim.SGD(params, lr=0.001, momentum=0.9, weight_decay=0.0005)
 lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.3)
-num_epochs = 5
+num_epochs = 20
 
 for epoch in range(num_epochs):
     train_one_epoch(model, optimizer, data_loader_train, device, epoch, print_freq=1000)
@@ -305,7 +306,7 @@ print("Predictions: \n", output)
 image = (images[0].permute(1,2,0).detach().cpu().numpy() * 255).astype(np.uint8)
 scores = output[0]['scores'].detach().cpu().numpy()
 
-high_scores_idxs = np.where(scores > 0.7)[0].tolist() # Indexes of boxes with scores > 0.7
+high_scores_idxs = np.where(scores > 0.6)[0].tolist() # Indexes of boxes with scores > 0.7
 post_nms_idxs = torchvision.ops.nms(output[0]['boxes'][high_scores_idxs], output[0]['scores'][high_scores_idxs], 0.3).cpu().numpy() # Indexes of boxes left after applying NMS (iou_threshold=0.3)
 
 # Below, in output[0]['keypoints'][high_scores_idxs][post_nms_idxs] and output[0]['boxes'][high_scores_idxs][post_nms_idxs]
