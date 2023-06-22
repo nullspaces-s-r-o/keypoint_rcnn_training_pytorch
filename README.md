@@ -32,3 +32,12 @@ class CocoEvaluator:
                 self.coco_eval[iou_type].params.kpt_oks_sigmas = np.array(2 * [0.5])/10.0
 
 ```
+
+#How to label
+install labelme using 
+```pip install labelme```
+
+run labelme using  
+```
+labelme.exe --nodata --autosave
+```
