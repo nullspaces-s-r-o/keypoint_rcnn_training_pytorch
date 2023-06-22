@@ -165,15 +165,19 @@ keypoints_classes_ids2names = {0: 'Head', 1: 'Tail'}
 def visualize(image, bboxes, keypoints, image_original=None, bboxes_original=None, keypoints_original=None):
     fontsize = 18
 
+    cv_fontsize = 0.6
+    cv_kp_radius = 5
+    cv_kp_color = (255, 255, 0)
+
     for bbox in bboxes:
         start_point = (bbox[0], bbox[1])
         end_point = (bbox[2], bbox[3])
-        image = cv2.rectangle(image.copy(), start_point, end_point, (0,255,0), 2)
+        image = cv2.rectangle(image.copy(), start_point, end_point, (0,255,0), 1)
     
     for kps in keypoints:
         for idx, kp in enumerate(kps):
-            image = cv2.circle(image.copy(), tuple(kp), 5, (255,0,0), 10)
-            image = cv2.putText(image.copy(), " " + keypoints_classes_ids2names[idx], tuple(kp), cv2.FONT_HERSHEY_SIMPLEX, 2, (255,0,0), 3, cv2.LINE_AA)
+            image = cv2.circle(image.copy(), tuple(kp), cv_kp_radius, cv_kp_color, 1)
+            image = cv2.putText(image.copy(), " " + keypoints_classes_ids2names[idx], tuple(kp), cv2.FONT_HERSHEY_SIMPLEX, cv_fontsize, cv_kp_color, 1, cv2.LINE_AA)
 
     if image_original is None and keypoints_original is None:
         plt.figure(figsize=(40,40))
@@ -183,12 +187,12 @@ def visualize(image, bboxes, keypoints, image_original=None, bboxes_original=Non
         for bbox in bboxes_original:
             start_point = (bbox[0], bbox[1])
             end_point = (bbox[2], bbox[3])
-            image_original = cv2.rectangle(image_original.copy(), start_point, end_point, (0,255,0), 2)
+            image_original = cv2.rectangle(image_original.copy(), start_point, end_point, (0,255,0), 1)
         
         for kps in keypoints_original:
             for idx, kp in enumerate(kps):
-                image_original = cv2.circle(image_original, tuple(kp), 5, (255,0,0), 10)
-                image_original = cv2.putText(image_original, " " + keypoints_classes_ids2names[idx], tuple(kp), cv2.FONT_HERSHEY_SIMPLEX, 2, (255,0,0), 3, cv2.LINE_AA)
+                image_original = cv2.circle(image_original, tuple(kp), cv_kp_radius, cv_kp_color, 1)
+                image_original = cv2.putText(image_original, " " + keypoints_classes_ids2names[idx], tuple(kp), cv2.FONT_HERSHEY_SIMPLEX, cv_fontsize, cv_kp_color, 1, cv2.LINE_AA)
 
         f, ax = plt.subplots(1, 2, figsize=(40, 20))
 
