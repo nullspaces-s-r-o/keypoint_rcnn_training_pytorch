@@ -7,3 +7,4 @@ back_bumper/annotations
 back_bumper/keypoint_def.csv
 back_bumper/keypoints.json
 kenv
+keypointsrcnn_weights.pth

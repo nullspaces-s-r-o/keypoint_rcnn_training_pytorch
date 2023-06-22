@@ -221,7 +221,9 @@ visualize(image, bboxes, keypoints, image_original, bboxes_original, keypoints_o
 
 
 def get_model(num_keypoints, weights_path=None):
-    
+    #Vysvetlení anchor generátoru
+    #https://stackoverflow.com/questions/56259670/difference-between-box-coordinate-and-anchor-boxes-in-keras
+
     anchor_generator = AnchorGenerator(sizes=(32, 64, 128, 256, 512), aspect_ratios=(0.25, 0.5, 0.75, 1.0, 2.0, 3.0, 4.0))
     model = torchvision.models.detection.keypointrcnn_resnet50_fpn(pretrained=False,
                                                                    pretrained_backbone=True,
