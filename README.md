@@ -40,7 +40,18 @@ install labelme using
 run labelme using  
 ```
 labelme.exe --nodata --autosave
-```¨
+```
+
+složku s fotkama olelujeme (pro každý objekt vytvoříme "rectangle" a dva body)
+na složku pustíme skript "labelme_2_COCO.py" -> to nám vytvoří json soubory pro COCO formát.
+Je potřeba manutálně přetahat vytvořené JSONY a fotky do takovéto datové strukury:
+<dataset_name>/train/annotations - sem dát trénovací JSON soubory
+<dataset_name>/train/images - sem dát trénovací snímky
+<dataset_name>/test/annotations - sem dít testovací JSON soubory
+<dataset_name>/test/images - sem dít testovací snímky
+
+
+
 
 ## Převod ipynb do *.py skriptu
 ```
