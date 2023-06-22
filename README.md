@@ -59,3 +59,12 @@ pip install nbconvert
 jupyter nbconvert --to script KeypointRCNN_training.ipynb
 ```
 -> vznikne `KeypointRCNN_training.py`
+
+# Potential improvements
+- počet anchors a počet aspect_ratios můžeme snížit protože známe vzdálenost blady od kamery
+
+# Dataset
+```
+mkdir -p $HOME/keypoints
+sshfs mendel@192.168.0.249:/home/mendel/sd/DetectionData/Dataset/keypoints $HOME/keypoints
+```
