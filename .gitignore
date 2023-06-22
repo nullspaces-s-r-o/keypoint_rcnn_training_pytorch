@@ -8,3 +8,5 @@ back_bumper/keypoint_def.csv
 back_bumper/keypoints.json
 kenv
 keypointsrcnn_weights.pth
+rv12_example_dataset/*
+rv12_COCO_dataset/*
