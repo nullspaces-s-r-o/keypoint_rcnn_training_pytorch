@@ -19,6 +19,16 @@ def labelme_to_coco(labelme_data):
 
         x1, y1 = bbox['points'][0]
         x2, y2 = bbox['points'][1]
+
+        if x1 > x2:
+            tmp = x2
+            x2 = x1
+            x1 = tmp
+
+        if y1 > y2:
+            tmp = y2
+            y2 = y1
+            y1 = tmp
         
         int_box = [int(item) for item in [x1, y1, x2, y2]] # convert to integers
         out_boxes.append(int_box)
