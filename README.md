@@ -40,4 +40,11 @@ install labelme using
 run labelme using  
 ```
 labelme.exe --nodata --autosave
+```¨
+
+## Převod ipynb do *.py skriptu
 ```
+pip install nbconvert 
+jupyter nbconvert --to script KeypointRCNN_training.ipynb
+```
+-> vznikne `KeypointRCNN_training.py`
